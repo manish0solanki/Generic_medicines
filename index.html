@@ -42,7 +42,15 @@
     margin-bottom: 10px;
   }
   .brand h1 { font-size: 24px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.02em; }
-  .brand p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+  .brand p { font-size: 14px; color: var(--ink-soft); margin: 0 0 14px; }
+
+  .lang-row { display: flex; gap: 6px; justify-content: center; }
+  .lang-row button {
+    padding: 5px 12px; font-size: 12px; font-weight: 700; font-family: inherit;
+    background: var(--card); color: var(--ink-soft); border: 1.5px solid var(--border);
+    border-radius: 20px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .lang-row button.active { background: var(--teal); color: #fff; border-color: var(--teal); }
 
   .search-row { display: flex; gap: 8px; margin-bottom: 24px; }
   .search-row input {
@@ -111,7 +119,13 @@
   <div class="brand">
     <div class="mark">SD</div>
     <h1>SastaDawa</h1>
-    <p>Same salt, half the price. Search any medicine.</p>
+    <p id="taglineText">Same salt, half the price. Search any medicine.</p>
+    <div class="lang-row" id="langRow">
+      <button type="button" data-lang="en" class="active">English</button>
+      <button type="button" data-lang="hi">हिंदी</button>
+      <button type="button" data-lang="mr">मराठी</button>
+      <button type="button" data-lang="gu">ગુજરાતી</button>
+    </div>
   </div>
 
   <form class="search-row" id="searchForm">
@@ -129,7 +143,7 @@
       <p id="medDescription" style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;"></p>
       <div class="price-grid">
         <div class="price-box ja">
-          <p class="price-label">Jan Aushadhi</p>
+          <p class="price-label" id="jaLabel">Jan Aushadhi</p>
           <p class="price-value" id="jaPrice"></p>
           <p class="pack-size" id="packSize"></p>
         </div>
@@ -139,12 +153,12 @@
         </div>
       </div>
       <div class="savings-wrap">
-        <div class="savings-label"><span>You save</span><strong id="savingsPct"></strong></div>
+        <div class="savings-label"><span id="youSaveLabel">You save</span><strong id="savingsPct"></strong></div>
         <div class="savings-track"><div class="savings-fill" id="savingsFill"></div></div>
       </div>
       <p class="disclaimer hidden" id="estimateNote" style="margin-bottom:12px;">Branded price is an AI estimate, not a live quote — actual prices may vary.</p>
       <a href="#" target="_blank" class="store-btn" id="storeBtn">Find nearest Jan Aushadhi store</a>
-      <p class="disclaimer">Confirm with your pharmacist or doctor before switching medicines.</p>
+      <p class="disclaimer" id="disclaimerText">Confirm with your pharmacist or doctor before switching medicines.</p>
     </div>
     <div class="not-found hidden" id="notFoundContent">
       <p id="notFoundText"></p>
@@ -153,8 +167,101 @@
 </main>
 
 <script>
+  const translations = {
+    en: {
+      tagline: 'Same salt, half the price. Search any medicine.',
+      placeholder: 'e.g. Crocin, Storvas 20',
+      search: 'Search',
+      loading: 'Checking Jan Aushadhi prices…',
+      error: "Couldn't reach the server. Check your connection and try again.",
+      jaLabel: 'Jan Aushadhi',
+      brandedLabel: 'Typical branded',
+      brandedLabelEst: 'Typical branded (estimate)',
+      youSave: 'You save',
+      storeBtn: 'Find nearest Jan Aushadhi store',
+      disclaimer: 'Confirm with your pharmacist or doctor before switching medicines.',
+      estimateNote: 'Branded price is an AI estimate, not a live quote — actual prices may vary.',
+      notFound: (q) => `We couldn't find a generic version of "${q}". It may not have a generic equivalent yet, or try checking the spelling.`
+    },
+    hi: {
+      tagline: 'एक ही नमक, आधी कीमत। कोई भी दवा खोजें।',
+      placeholder: 'जैसे Crocin, Storvas 20',
+      search: 'खोजें',
+      loading: 'जन औषधि की कीमतें देखी जा रही हैं…',
+      error: 'सर्वर से संपर्क नहीं हो सका। कृपया कनेक्शन जांचें और फिर से प्रयास करें।',
+      jaLabel: 'जन औषधि',
+      brandedLabel: 'सामान्य ब्रांडेड कीमत',
+      brandedLabelEst: 'सामान्य ब्रांडेड कीमत (अनुमानित)',
+      youSave: 'आपकी बचत',
+      storeBtn: 'नज़दीकी जन औषधि स्टोर खोजें',
+      disclaimer: 'दवा बदलने से पहले कृपया अपने फार्मासिस्ट या डॉक्टर से सलाह लें।',
+      estimateNote: 'ब्रांडेड कीमत एक AI अनुमान है, वास्तविक कीमत अलग हो सकती है।',
+      notFound: (q) => `हमें "${q}" का जेनेरिक संस्करण नहीं मिला। हो सकता है इसका कोई जेनेरिक विकल्प उपलब्ध न हो, या स्पेलिंग जांचें।`
+    },
+    mr: {
+      tagline: 'तेच मीठ (सॉल्ट), निम्मी किंमत. कोणतेही औषध शोधा.',
+      placeholder: 'उदा. Crocin, Storvas 20',
+      search: 'शोधा',
+      loading: 'जन औषधी किमती तपासत आहोत…',
+      error: 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.',
+      jaLabel: 'जन औषधी',
+      brandedLabel: 'सर्वसाधारण ब्रँडेड किंमत',
+      brandedLabelEst: 'सर्वसाधारण ब्रँडेड किंमत (अंदाजे)',
+      youSave: 'तुमची बचत',
+      storeBtn: 'जवळचे जन औषधी केंद्र शोधा',
+      disclaimer: 'औषध बदलण्यापूर्वी कृपया तुमच्या फार्मासिस्ट किंवा डॉक्टरांचा सल्ला घ्या.',
+      estimateNote: 'ब्रँडेड किंमत ही AI चा अंदाज आहे, प्रत्यक्ष किंमत वेगळी असू शकते.',
+      notFound: (q) => `आम्हाला "${q}" चे जेनेरिक औषध सापडले नाही. कदाचित याचा जेनेरिक पर्याय उपलब्ध नसेल, किंवा स्पेलिंग तपासा.`
+    },
+    gu: {
+      tagline: 'એ જ ક્ષાર, અડધી કિંમત. કોઈપણ દવા શોધો.',
+      placeholder: 'દા.ત. Crocin, Storvas 20',
+      search: 'શોધો',
+      loading: 'જન ઔષધિ ભાવ તપાસી રહ્યા છીએ…',
+      error: 'સર્વર સાથે સંપર્ક થઈ શક્યો નથી. કૃપા કરી કનેક્શન તપાસો અને ફરી પ્રયાસ કરો.',
+      jaLabel: 'જન ઔષધિ',
+      brandedLabel: 'સામાન્ય બ્રાન્ડેડ કિંમત',
+      brandedLabelEst: 'સામાન્ય બ્રાન્ડેડ કિંમત (અંદાજિત)',
+      youSave: 'તમારી બચત',
+      storeBtn: 'નજીકનું જન ઔષધિ સ્ટોર શોધો',
+      disclaimer: 'દવા બદલતા પહેલા કૃપા કરી તમારા ફાર્માસિસ્ટ અથવા ડોક્ટરની સલાહ લો.',
+      estimateNote: 'બ્રાન્ડેડ કિંમત એ AI અંદાજ છે, વાસ્તવિક કિંમત અલગ હોઈ શકે છે.',
+      notFound: (q) => `અમને "${q}" ની જેનેરિક આવૃત્તિ મળી નથી. કદાચ તેનો જેનેરિક વિકલ્પ ઉપલબ્ધ ન હોય, અથવા જોડણી તપાસો.`
+    }
+  };
+
+  let currentLang = 'en';
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    const t = translations[lang];
+    document.getElementById('taglineText').textContent = t.tagline;
+    document.getElementById('medicineInput').placeholder = t.placeholder;
+    document.getElementById('searchBtn').textContent = t.search;
+    document.getElementById('loadingState').textContent = t.loading;
+    document.getElementById('errorState').textContent = t.error;
+    document.getElementById('jaLabel').textContent = t.jaLabel;
+    document.getElementById('youSaveLabel').textContent = t.youSave;
+    document.getElementById('storeBtn').textContent = t.storeBtn;
+    document.getElementById('disclaimerText').textContent = t.disclaimer;
+
+    const brandedLabelEl = document.getElementById('brandedLabel');
+    const isEstimate = !document.getElementById('estimateNote').classList.contains('hidden');
+    brandedLabelEl.textContent = isEstimate ? t.brandedLabelEst : t.brandedLabel;
+    document.getElementById('estimateNote').textContent = t.estimateNote;
+
+    document.querySelectorAll('#langRow button').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+
+  document.getElementById('langRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-lang]');
+    if (btn) applyLanguage(btn.dataset.lang);
+  });
+
   // REPLACE THIS with your actual n8n webhook URL once the workflow is active
-  const WEBHOOK_URL = 'https://manish0solanki.app.n8n.cloud/webhook/medicine-search';
+  const WEBHOOK_URL = 'https://manish0solanki.app.n8n.cloud/webhook-test/medicine-search';
 
   const form = document.getElementById('searchForm');
   const input = document.getElementById('medicineInput');
@@ -181,7 +288,7 @@
     btn.disabled = true;
 
     try {
-      const url = WEBHOOK_URL + '?medicine=' + encodeURIComponent(query);
+      const url = WEBHOOK_URL + '?medicine=' + encodeURIComponent(query) + '&lang=' + currentLang;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Server error');
       const data = await res.json();
@@ -191,6 +298,8 @@
       resultCard.style.animation = 'none';
       void resultCard.offsetWidth;
       resultCard.style.animation = '';
+
+      const t = translations[currentLang];
 
       if (data.found) {
         foundContent.classList.remove('hidden');
@@ -205,10 +314,10 @@
 
         const estimateNote = document.getElementById('estimateNote');
         if (data.price_is_estimated) {
-          document.getElementById('brandedLabel').textContent = 'Typical branded (estimate)';
+          document.getElementById('brandedLabel').textContent = t.brandedLabelEst;
           estimateNote.classList.remove('hidden');
         } else {
-          document.getElementById('brandedLabel').textContent = 'Typical branded';
+          document.getElementById('brandedLabel').textContent = t.brandedLabel;
           estimateNote.classList.add('hidden');
         }
 
@@ -226,8 +335,7 @@
       } else {
         foundContent.classList.add('hidden');
         notFoundContent.classList.remove('hidden');
-        document.getElementById('notFoundText').textContent =
-          data.description || ("We couldn't confidently match \"" + query + "\" to a Jan Aushadhi generic. It may not have a generic version yet, or try checking the spelling.");
+        document.getElementById('notFoundText').textContent = data.description || t.notFound(query);
       }
     } catch (err) {
       hideAll();
