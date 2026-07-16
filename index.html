@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SastaDawa — same salt, half the price</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F6F3;
+    --card: #FFFFFF;
+    --ink: #1B2B27;
+    --ink-soft: #5B6B66;
+    --teal: #0F6E56;
+    --teal-deep: #085041;
+    --teal-pale: #E1F5EE;
+    --coral: #D85A30;
+    --coral-pale: #FAECE7;
+    --coral-deep: #712B13;
+    --border: rgba(27,43,39,0.10);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 64px;
+  }
+  main { width: 100%; max-width: 480px; }
+
+  .brand { text-align: center; margin-bottom: 28px; }
+  .brand .mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--teal); color: #fff; font-weight: 800; font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .brand h1 { font-size: 24px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .brand p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+  .search-row { display: flex; gap: 8px; margin-bottom: 24px; }
+  .search-row input {
+    flex: 1; padding: 14px 16px; font-size: 16px; font-family: inherit;
+    border: 1.5px solid var(--border); border-radius: 12px; background: var(--card);
+    color: var(--ink); outline: none; transition: border-color 0.15s ease;
+  }
+  .search-row input:focus { border-color: var(--teal); }
+  .search-row button {
+    padding: 0 22px; font-size: 15px; font-weight: 700; font-family: inherit;
+    background: var(--teal); color: #fff; border: none; border-radius: 12px;
+    cursor: pointer; transition: background 0.15s ease;
+  }
+  .search-row button:hover { background: var(--teal-deep); }
+  .search-row button:disabled { background: var(--ink-soft); cursor: default; }
+
+  .state { text-align: center; padding: 32px 16px; color: var(--ink-soft); font-size: 14px; }
+  .state.hidden { display: none; }
+
+  .result-card {
+    background: var(--card); border-radius: var(--radius); border: 1.5px solid var(--border);
+    padding: 22px; opacity: 0; transform: translateY(6px);
+    animation: rise 0.35s ease forwards;
+  }
+  @media (prefers-reduced-motion: reduce) { .result-card { animation: none; opacity: 1; transform: none; } }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .result-card.hidden { display: none; }
+
+  .med-name { font-size: 19px; font-weight: 800; margin: 0 0 2px; }
+  .med-strength { font-size: 13px; color: var(--ink-soft); margin: 0 0 18px; }
+
+  .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .price-box { border-radius: 12px; padding: 14px; }
+  .price-box.ja { background: var(--teal-pale); }
+  .price-box.branded { background: var(--bg); }
+  .price-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 4px; }
+  .price-box.ja .price-label { color: var(--teal-deep); }
+  .price-box.branded .price-label { color: var(--ink-soft); }
+  .price-value { font-size: 22px; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums; }
+  .price-box.ja .price-value { color: var(--teal-deep); }
+  .price-box.branded .price-value { color: var(--ink); }
+  .pack-size { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+  .savings-wrap { margin-bottom: 16px; }
+  .savings-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+  .savings-label strong { color: var(--coral-deep); font-weight: 800; }
+  .savings-track { height: 8px; border-radius: 4px; background: var(--coral-pale); overflow: hidden; }
+  .savings-fill { height: 100%; background: var(--coral); border-radius: 4px; width: 0%; transition: width 0.6s ease 0.2s; }
+  @media (prefers-reduced-motion: reduce) { .savings-fill { transition: none; } }
+
+  .store-btn {
+    width: 100%; padding: 13px; font-size: 14px; font-weight: 700; font-family: inherit;
+    background: var(--ink); color: #fff; border: none; border-radius: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; margin-bottom: 12px;
+  }
+
+  .disclaimer { font-size: 12px; color: var(--ink-soft); text-align: center; line-height: 1.5; margin: 0; }
+
+  .not-found { text-align: center; padding: 8px; }
+  .not-found p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <div class="mark">SD</div>
+    <h1>SastaDawa</h1>
+    <p>Same salt, half the price. Search any medicine.</p>
+  </div>
+
+  <form class="search-row" id="searchForm">
+    <input type="text" id="medicineInput" placeholder="e.g. Crocin, Storvas 20" autocomplete="off" required>
+    <button type="submit" id="searchBtn">Search</button>
+  </form>
+
+  <div class="state hidden" id="loadingState">Checking Jan Aushadhi prices…</div>
+  <div class="state hidden" id="errorState">Couldn't reach the server. Check your connection and try again.</div>
+
+  <div class="result-card hidden" id="resultCard">
+    <div id="foundContent">
+      <p class="med-name" id="medName"></p>
+      <p class="med-strength" id="medStrength"></p>
+      <div class="price-grid">
+        <div class="price-box ja">
+          <p class="price-label">Jan Aushadhi</p>
+          <p class="price-value" id="jaPrice"></p>
+          <p class="pack-size" id="packSize"></p>
+        </div>
+        <div class="price-box branded">
+          <p class="price-label">Typical branded</p>
+          <p class="price-value" id="brandedPrice"></p>
+        </div>
+      </div>
+      <div class="savings-wrap">
+        <div class="savings-label"><span>You save</span><strong id="savingsPct"></strong></div>
+        <div class="savings-track"><div class="savings-fill" id="savingsFill"></div></div>
+      </div>
+      <a href="#" target="_blank" class="store-btn" id="storeBtn">Find nearest Jan Aushadhi store</a>
+      <p class="disclaimer">Confirm with your pharmacist or doctor before switching medicines.</p>
+    </div>
+    <div class="not-found hidden" id="notFoundContent">
+      <p id="notFoundText"></p>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Replace this with your actual n8n webhook URL once the workflow is active.
+  const WEBHOOK_URL = 'https://manish0solanki.app.n8n.cloud/webhook-test/medicine-search';
+
+  const form = document.getElementById('searchForm');
+  const input = document.getElementById('medicineInput');
+  const btn = document.getElementById('searchBtn');
+  const loadingState = document.getElementById('loadingState');
+  const errorState = document.getElementById('errorState');
+  const resultCard = document.getElementById('resultCard');
+  const foundContent = document.getElementById('foundContent');
+  const notFoundContent = document.getElementById('notFoundContent');
+
+  function hideAll() {
+    loadingState.classList.add('hidden');
+    errorState.classList.add('hidden');
+    resultCard.classList.add('hidden');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+
+    hideAll();
+    loadingState.classList.remove('hidden');
+    btn.disabled = true;
+
+    try {
+      const url = WEBHOOK_URL + '?medicine=' + encodeURIComponent(query);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Server error');
+      const data = await res.json();
+
+      hideAll();
+      resultCard.classList.remove('hidden');
+      resultCard.style.animation = 'none';
+      void resultCard.offsetWidth;
+      resultCard.style.animation = '';
+
+      if (data.found) {
+        foundContent.classList.remove('hidden');
+        notFoundContent.classList.add('hidden');
+
+        document.getElementById('medName').textContent = data.generic_name || 'Generic match found';
+        document.getElementById('medStrength').textContent = data.pack_size ? ('Pack size: ' + data.pack_size) : '';
+        document.getElementById('jaPrice').textContent = 'Rs ' + data.jan_aushadhi_price;
+        document.getElementById('brandedPrice').textContent = 'Rs ' + data.branded_price_range;
+        document.getElementById('packSize').textContent = '';
+
+        const ja = parseFloat(data.jan_aushadhi_price);
+        const branded = parseFloat(data.branded_price_range);
+        let pct = 0;
+        if (!Number.isNaN(ja) && !Number.isNaN(branded) && branded > 0) {
+          pct = Math.round(((branded - ja) / branded) * 100);
+        }
+        document.getElementById('savingsPct').textContent = pct + '%';
+        document.getElementById('savingsFill').style.width = Math.max(pct, 4) + '%';
+
+        const mapQuery = encodeURIComponent('Jan Aushadhi Kendra near me');
+        document.getElementById('storeBtn').href = 'https://www.google.com/maps/search/' + mapQuery;
+      } else {
+        foundContent.classList.add('hidden');
+        notFoundContent.classList.remove('hidden');
+        document.getElementById('notFoundText').textContent =
+          'We couldn\'t confidently match "' + query + '" to a Jan Aushadhi generic. It may not have a generic version yet, or try checking the spelling.';
+      }
+    } catch (err) {
+      hideAll();
+      errorState.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
