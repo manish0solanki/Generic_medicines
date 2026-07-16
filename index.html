@@ -126,6 +126,7 @@
     <div id="foundContent">
       <p class="med-name" id="medName"></p>
       <p class="med-strength" id="medStrength"></p>
+      <p id="medDescription" style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;"></p>
       <div class="price-grid">
         <div class="price-box ja">
           <p class="price-label">Jan Aushadhi</p>
@@ -197,6 +198,7 @@
 
         document.getElementById('medName').textContent = data.generic_name || 'Generic match found';
         document.getElementById('medStrength').textContent = data.pack_size ? ('Pack size: ' + data.pack_size) : '';
+        document.getElementById('medDescription').textContent = data.description || '';
         document.getElementById('jaPrice').textContent = 'Rs ' + data.jan_aushadhi_price;
         document.getElementById('brandedPrice').textContent = 'Rs ' + data.branded_price_range;
         document.getElementById('packSize').textContent = '';
@@ -225,7 +227,7 @@
         foundContent.classList.add('hidden');
         notFoundContent.classList.remove('hidden');
         document.getElementById('notFoundText').textContent =
-          "We couldn't confidently match \"" + query + "\" to a Jan Aushadhi generic. It may not have a generic version yet, or try checking the spelling.";
+          data.description || ("We couldn't confidently match \"" + query + "\" to a Jan Aushadhi generic. It may not have a generic version yet, or try checking the spelling.");
       }
     } catch (err) {
       hideAll();
