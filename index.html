@@ -198,7 +198,7 @@
 
         document.getElementById('medName').textContent = data.generic_name || 'Generic match found';
         document.getElementById('medStrength').textContent = data.pack_size ? ('Pack size: ' + data.pack_size) : '';
-        document.getElementById('medDescription').textContent = data.description || '';
+        document.getElementById('medDescription').textContent = data.common_use || '';
         document.getElementById('jaPrice').textContent = 'Rs ' + data.jan_aushadhi_price;
         document.getElementById('brandedPrice').textContent = 'Rs ' + data.branded_price_range;
         document.getElementById('packSize').textContent = '';
